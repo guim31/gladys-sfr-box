@@ -13,7 +13,8 @@ triggers and a dashboard widget.
 > **Developed without the hardware: feedback welcome.** See the user
 > documentation for the models covered and how to report what your box returns.
 
-User documentation: [English](docs/en.md) · [Français](docs/fr.md).
+User documentation: [English](docs/en.md) · [Français](docs/fr.md) ·
+[Deutsch](docs/de.md) · [Español](docs/es.md).
 
 ## How it works
 

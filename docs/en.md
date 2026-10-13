@@ -127,5 +127,7 @@ adds a reboot button, with a confirmation, when the password is configured.
   state and the reboot.
 - A value stays empty: your firmware may not provide it. Run **Test the
   connection** and share the result in an issue.
-- The integration logs are available in Gladys (integration page). Set
-  `LOG_LEVEL=debug` for more detail; passwords and tokens are never logged.
+- The integration logs are available in Gladys, in the **Logs** tab of the
+  integration. In normal operation they stay quiet: startup, connection,
+  failures and their recovery, and your actions. Set `LOG_LEVEL=debug` for
+  more detail; passwords and tokens are never logged.

@@ -81,6 +81,8 @@ export class BoxMonitor {
     this.announcedWanUp = undefined;
     this.wanDownSince = null;
     this.quietUntil = 0;
+    // Failures that repeat at every reading: logged once, then on recovery.
+    this.failing = new Set();
   }
 
   /** (Re)apply the configuration: new client, so a refused password is retried. */
@@ -94,7 +96,10 @@ export class BoxMonitor {
   start() {
     this.stop();
     this.timer = setInterval(() => {
-      this.refresh().catch((err) => logger.error('Reading failed', err));
+      this.refresh().then(
+        () => this.recovered('reading', 'Reading works again'),
+        (err) => this.failed('reading', 'Reading failed', err),
+      );
     }, REFRESH_INTERVAL_MS);
   }
 
@@ -120,6 +125,8 @@ export class BoxMonitor {
     } catch (err) {
       if (this.reachable !== false) {
         logger.warn(`SFR Box unreachable: ${err.message}`);
+      } else {
+        logger.debug(`SFR Box still unreachable: ${err.message}`);
       }
       this.reachable = false;
       await this.reportStatus('unreachable');
@@ -136,6 +143,10 @@ export class BoxMonitor {
     await this.publishDiscovery();
     await this.publishStates();
     this.notifyWidget();
+    logger.debug(
+      `Reading: Internet ${snapshot.wan.up}, line ${snapshot.infra}, ` +
+        `${snapshot.hosts?.length ?? '?'} hosts, auth ${snapshot.auth}`,
+    );
     return snapshot;
   }
 
@@ -197,10 +208,11 @@ export class BoxMonitor {
     }
     try {
       await this.gladys.publishChangedStates(states, { heartbeat });
+      this.recovered('publish', 'Publishing states works again');
     } catch (err) {
       // Re-sent at the next reading: publishChangedStates only remembers what
       // Gladys accepted.
-      logger.warn(`Publishing states failed: ${err.message}`);
+      this.failed('publish', `Publishing states failed: ${err.message}`);
     }
   }
 
@@ -222,8 +234,10 @@ export class BoxMonitor {
         await this.gladys.setConnectionStatus(true);
       }
       this.statusKey = key;
+      this.recovered('status', 'Connection status published again');
     } catch (err) {
-      logger.warn(`Connection status not published: ${err.message}`);
+      // Retried at the next reading (statusKey unchanged).
+      this.failed('status', `Connection status not published: ${err.message}`);
     }
   }
 
@@ -263,6 +277,27 @@ export class BoxMonitor {
       }
     } catch (err) {
       logger.warn(`Scene event not published: ${err.message}`);
+    }
+  }
+
+  /** Log a repeating failure once: warn the first time, debug afterwards. */
+  failed(key, message, err) {
+    const detail = err ? [err] : [];
+    if (this.failing.has(key)) {
+      logger.debug(message, ...detail);
+      return;
+    }
+    this.failing.add(key);
+    if (err) {
+      logger.error(message, err);
+    } else {
+      logger.warn(message);
+    }
+  }
+
+  recovered(key, message) {
+    if (this.failing.delete(key)) {
+      logger.info(message);
     }
   }
 
