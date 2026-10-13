@@ -14,7 +14,8 @@ export function createSceneActions({ monitor }) {
     // The scene author chose to reboot: no confirmation here. The monitor
     // mutes the connection triggers during the reboot (no scene loop).
     async reboot_box() {
-      logger.info('Scene action reboot_box');
+      // monitor.reboot() writes the info line: one line per action.
+      logger.debug('Scene action reboot_box');
       await monitor.reboot();
     },
   };

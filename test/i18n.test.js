@@ -111,6 +111,52 @@ test('the manifest name is short and the same in every language', () => {
   assert.ok(manifest.name.length >= 3 && manifest.name.length <= 30);
 });
 
+// The store publishes docs/en.md and docs/fr.md, and since Gladys 5.2 the
+// optional docs/de.md and docs/es.md (DOCS_OPTIONAL_LANGUAGES): all four exist,
+// with the same sections in the same order.
+const docs = Object.fromEntries(
+  await Promise.all(
+    LANGUAGES.map(async (language) => [
+      language,
+      await readFile(new URL(`../docs/${language}.md`, import.meta.url), 'utf8'),
+    ]),
+  ),
+);
+const headings = (markdown) =>
+  markdown
+    .replace(/```[\s\S]*?```/g, '')
+    .split('\n')
+    .filter((line) => /^#{1,6} /.test(line) || /^\*\*[^*]+\*\*$/.test(line));
+
+test('the documentation exists in the four languages, with the same sections', () => {
+  const reference = headings(docs.fr);
+  assert.ok(reference.length >= 8, 'docs/fr.md sections');
+  for (const language of LANGUAGES) {
+    const sections = headings(docs[language]);
+    assert.deepEqual(
+      sections.map((line) => line.match(/^(#+|\*\*)/)[1]),
+      reference.map((line) => line.match(/^(#+|\*\*)/)[1]),
+      `docs/${language}.md: same sections as docs/fr.md`,
+    );
+    assert.equal(sections[0], '# SFR Box', `docs/${language}.md: the brand stays untranslated`);
+    if (language !== 'fr') {
+      // Translated: no French section title left behind.
+      const untranslated = sections.slice(1).filter((line) => reference.includes(line));
+      assert.deepEqual(
+        untranslated.filter((line) => !['## Configuration', '## Actions'].includes(line)),
+        [],
+        `docs/${language}.md`,
+      );
+    }
+  }
+  for (const line of docs.de.split('\n')) {
+    assert.doesNotMatch(line, FORMAL_GERMAN, 'docs/de.md uses the formal "Sie"');
+  }
+  for (const line of docs.es.split('\n')) {
+    assert.doesNotMatch(line, INFORMAL_SPANISH, 'docs/es.md must use "usted"');
+  }
+});
+
 test('the formal-German and informal-Spanish checks do catch them', () => {
   assert.match('Prüfen Sie die Adresse', FORMAL_GERMAN);
   assert.match('Ihr Passwort', FORMAL_GERMAN);

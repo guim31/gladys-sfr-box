@@ -10,6 +10,17 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- Documentation in German and Spanish, published by the store since Gladys 5.2.
+
+### Changed
+
+- Quieter logs: a normal reading writes nothing at the info level, and a
+  failure that repeats (box unreachable, states or connection status refused
+  by Gladys, failed reading) writes one line when it starts and one when it
+  ends. Details stay available with `LOG_LEVEL=debug`.
+
 ## [1.0.1] - 2026-10-13
 
 ### Added

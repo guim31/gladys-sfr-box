@@ -45,7 +45,7 @@ src/widgets.js                    dashboard widget (manifest `widgets`)
 src/i18n.js                       every user-facing text, en / fr / de / es
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (en, fr mandatory)
 test/                             node --test, against the SDK's fake Gladys and a fake box
 test/helpers/fake-box.js          fake SFR Box (fixtures of test/fixtures/sfr, token auth)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
@@ -78,7 +78,8 @@ test/helpers/fake-box.js          fake SFR Box (fixtures of test/fixtures/sfr, t
   code (defaults, action, scene and widget handlers): change both sides
   together.
 - **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+  manifest texts, and `docs/en.md` / `docs/fr.md` (plus `de.md` / `es.md`),
+  kept in sync.
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -222,5 +223,13 @@ code de ce dépôt. Compléter ce fichier quand un nouveau piège est découvert
 Tout texte montré à l'utilisateur existe en **`en`, `fr`, `de` et `es`** : manifeste, contenu des widgets, messages,
 noms de fonctionnalités. L'allemand **tutoie** (« du »), l'espagnol **vouvoie** (« usted ») : décision de Guilhem,
 appliquée à ses 21 intégrations. `test/i18n.test.js` doit échouer sur une langue manquante, un texte vide ou trop
-long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store ne publie que `docs/en.md` et `docs/fr.md`
-(`DOCS_LANGUAGES` d'integration-store) : pas de doc de/es.
+long, et sur un « Sie »/« Ihr… » de politesse en allemand. Depuis Gladys 5.2, le store publie `docs/en.md` et
+`docs/fr.md` (obligatoires, `DOCS_LANGUAGES` d'integration-store) et aussi `docs/de.md` et `docs/es.md` quand ils
+existent (`DOCS_OPTIONAL_LANGUAGES`) : les quatre docs existent, avec les mêmes sections (`test/i18n.test.js`).
+
+### Journaux (depuis le 13/10/2026)
+
+Rien au niveau info pour un cycle normal de lecture : l'info ne garde que le cycle de vie (démarrage, connexion, perte
+et retour, une ligne par action de l'utilisateur). Une erreur qui se répète écrit une ligne au premier échec et une au
+rétablissement (`failed`/`recovered` de `src/monitor.js`), le reste passe en debug (`LOG_LEVEL=debug`).
+`test/logs.test.js` le vérifie, et qu'aucun secret de la config n'apparaît.

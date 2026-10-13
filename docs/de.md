@@ -1,0 +1,142 @@
+# SFR Box
+
+Behalte deine SFR Box in Gladys im Blick: Leitung, Internetverbindung, WLAN,
+verbundene Geräte – und starte sie aus einer Szene oder vom Dashboard aus neu.
+Alles bleibt in deinem lokalen Netzwerk: Gladys fragt die Box einmal pro Minute
+über ihre lokale API ab, ohne Cloud-Konto.
+
+> **Ohne die Hardware entwickelt: Rückmeldungen willkommen.** Diese Integration
+> wurde anhand der öffentlichen Dokumentation der Box-API und echter Antworten
+> geschrieben, die die freie Bibliothek
+> [hacf-fr/sfrbox-api](https://github.com/hacf-fr/sfrbox-api) (Home Assistant)
+> gesammelt hat. Wenn bei deiner Box etwas fehlt oder falsch ist, eröffne ein
+> Issue mit deinem Modell und deiner Firmware (die Schaltfläche **Verbindung
+> testen** zeigt beides an).
+>
+> Diese Integration steht in keiner Verbindung zu SFR.
+
+## Kompatible Boxen
+
+Die Box muss die lokale „neufbox“-API bereitstellen (`http://192.168.1.1/api/1.0/`).
+
+| Box                                        | Stand                                                                                                                                                                         |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NB4, NB5, NB6, NB6V, NB6VAC                | Die API ist für diese Modelle dokumentiert.                                                                                                                                   |
+| Neuere Firmwares (`BOX10H`, `3DCM` / FTTB) | Systeminformationen durch echte Antworten bestätigt; der Rest ist nicht getestet.                                                                                             |
+| SFR Box 8 und 8X                           | Unbekannt: Weder die API-Dokumentation noch Home Assistant erwähnen sie. Die neueren Firmwares oben lassen vermuten, dass sie antworten. Deine Rückmeldungen sind willkommen. |
+| Boxen ohne diese API (z. B. `NCC`)         | Nicht unterstützt.                                                                                                                                                            |
+
+## Voraussetzungen
+
+- Gladys 5.1 oder neuer.
+- Gladys und die Box im selben lokalen Netzwerk.
+- Optional: das **Administratorpasswort** der Box. Standardmäßig ist es der
+  WLAN-Schlüssel auf dem Etikett der Box, außer du hast es in der Oberfläche
+  der Box (`http://192.168.1.1`) geändert.
+
+## Konfiguration
+
+1. Installiere die Integration aus dem Katalog von Gladys und öffne dann ihren
+   Tab **Konfiguration**.
+2. **Adresse der Box**: `192.168.1.1`, außer dein Netzwerk verwendet eine
+   andere.
+3. **Administrator-Benutzername** (`admin`) und **Administratorpasswort**:
+   optional. Ohne sie bekommst du die Leitung, die Internetverbindung und die
+   Systeminformationen. Mit ihnen auch den WLAN-Status und den Neustart.
+4. **Verbundene Geräte erkennen**: listet die von der Box gesehenen Geräte auf,
+   für die Anwesenheitserkennung.
+5. **Sprache der Funktionsnamen**: die Namen, die die Funktionen bekommen, wenn
+   du ein Gerät hinzufügst (danach ändern sie sich nicht mehr).
+6. Klicke auf **Konfiguration speichern** und dann auf **Verbindung testen**:
+   Das Ergebnis zeigt das Modell, die Firmware, die Leitung, die Anzahl der
+   verbundenen Geräte und ob das Passwort akzeptiert wird.
+7. Öffne den Tab **Entdecken** und füge das Gerät **SFR Box** hinzu
+   (**Zu Gladys hinzufügen**), ebenso die verbundenen Geräte, die du verfolgen
+   möchtest.
+
+Das Passwort wird von Gladys gespeichert und nie in die Protokolle geschrieben.
+
+## Was du bekommst
+
+**Das Gerät „SFR Box“**
+
+| Funktion                                         | Wann                                    |
+| ------------------------------------------------ | --------------------------------------- |
+| Internetverbindung (verbunden oder nicht)        | immer                                   |
+| IPv6-Verbindung                                  | immer                                   |
+| Öffentliche IPv4-Adresse                         | immer                                   |
+| Leitungstyp (ADSL, FTTH …)                       | immer                                   |
+| DSL-Leitung synchronisiert                       | DSL-Leitung                             |
+| DSL-Datenrate im Download und Upload (kbit/s)    | DSL-Leitung                             |
+| Dämpfung und Störabstand, im Download und Upload | DSL-Leitung                             |
+| Glasfaserleitung aktiv                           | Glasfaserleitung                        |
+| WLAN aktiviert                                   | mit dem Administratorpasswort           |
+| Betriebszeit der Box (Stunden)                   | immer                                   |
+| Temperatur der Box                               | wenn die Box einen Temperaturfühler hat |
+| Modell, Firmware                                 | immer                                   |
+
+Die Glasfaserleitung liefert über diese API keine Datenrate: Die Datenraten
+betreffen nur DSL. Wenn du das Passwort später hinzufügst oder deine Leitung
+auf Glasfaser umgestellt wird, schlägt der Tab **Entdecken** vor, das Gerät zu
+**Aktualisieren**.
+
+**Verbundene Geräte (Anwesenheit)**
+
+Jedes von der Box gesehene Gerät kann als Gladys-Gerät mit einer Funktion
+**Anwesenheit** hinzugefügt werden, angezeigt als „vor N Minuten gesehen“.
+Diese Funktion wird aktualisiert, sobald das Gerät im Netzwerk auftaucht, und
+dann alle 5 Minuten, solange es verbunden bleibt. Um jemanden als abwesend zu
+markieren, verwende die Szenen-Aktion **Anwesenheit von Benutzern
+überprüfen** von Gladys mit einer Dauer von **10 Minuten oder mehr**.
+
+Smartphones verwenden oft eine **private (zufällige) WLAN-Adresse** pro
+Netzwerk: Deaktiviere sie für dein Heimnetz in den WLAN-Einstellungen des
+Smartphones, sonst taucht das Gerät unter einer neuen Adresse auf. Je nach
+Firmware liefert die Box diese Liste nur mit dem Administratorpasswort.
+
+## Szenen
+
+- **Internetverbindung verloren** (Auslöser): Die Box meldet ihre
+  Internetverbindung als getrennt. Wird nicht während eines Neustarts
+  ausgelöst, den Gladys angefordert hat.
+- **Internetverbindung wiederhergestellt** (Auslöser): Die Verbindung ist
+  zurück. Die folgenden Aktionen lesen die Dauer der Unterbrechung mit
+  `{{triggerEvent.data.outage_seconds}}` (auf etwa eine Minute genau, leer,
+  wenn die Unterbrechung begann, bevor Gladys die Box überwacht hat).
+- **SFR Box neu starten** (Aktion): Internet, TV und Telefon sind ein paar
+  Minuten unterbrochen. Braucht das Administratorpasswort.
+
+Diese Auslöser beruhen auf dem, was die Box meldet: Ist die Box selbst nicht
+erreichbar (ausgeschaltet, im Neustart), wird nichts ausgelöst.
+
+## Dashboard
+
+Das Widget **SFR Box** zeigt die Internetverbindung, den Leitungsstatus, die
+DSL-Datenraten, die Betriebszeit und die Temperatur. Seine Einstellung
+**Neustart-Taste anzeigen** fügt eine Neustart-Taste mit Bestätigung hinzu,
+wenn das Passwort konfiguriert ist.
+
+## Aktionen
+
+- **Verbindung testen**: fragt die Box jetzt ab und prüft das Passwort.
+- **Box neu starten**: Setze das Häkchen bei **Ich bestätige den Neustart** und
+  starte dann die Aktion.
+
+## Fehlerbehebung
+
+- **„SFR Box nicht erreichbar“**: Prüfe die Adresse und ob Gladys im selben
+  Netzwerk läuft wie die Box (ein VPN oder ein zweiter Router dazwischen
+  verhindert den Zugriff).
+- **„Passwort von der Box abgelehnt“**: Prüfe das Passwort in der Oberfläche
+  der Box. Nach einer Ablehnung versucht Gladys es nicht weiter, um das Konto
+  nicht zu sperren: Speichere die Konfiguration erneut, um es noch einmal zu
+  versuchen.
+- **„Die Box erlaubt nur die Anmeldung per Taste“**: Die Box hat die Anmeldung
+  per Passwort deaktiviert. Aktiviere sie in der Oberfläche der Box für den
+  WLAN-Status und den Neustart.
+- Ein Wert bleibt leer: Deine Firmware liefert ihn vielleicht nicht. Starte
+  **Verbindung testen** und teile das Ergebnis in einem Issue.
+- Die Protokolle der Integration findest du in Gladys, im Tab **Protokolle**
+  der Integration. Im Normalbetrieb bleiben sie ruhig: Start, Verbindung,
+  Ausfälle und ihre Behebung sowie deine Aktionen. Setze `LOG_LEVEL=debug` für
+  mehr Details; Passwörter und Tokens stehen nie darin.

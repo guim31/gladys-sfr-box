@@ -44,6 +44,13 @@ export function registerHandlers(gladys, options = {}) {
     await monitor.onDeviceCreated();
   });
 
+  // Fallback only: the devices are published with should_poll: false and the
+  // monitor's own timer reads the box every minute (the core scheduler cannot
+  // be relied on, Gladys#3198). Should Gladys poll anyway, read and publish.
+  gladys.onPoll(async () => {
+    await monitor.refresh();
+  });
+
   gladys.onConfigUpdated(async (config) => {
     logger.info('Configuration updated');
     monitor.configure(normalizeConfig(config));

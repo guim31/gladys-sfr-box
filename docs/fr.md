@@ -134,6 +134,8 @@ confirmation, quand le mot de passe est configuré.
   pour l’état du Wi-Fi et le redémarrage.
 - Une valeur reste vide : votre firmware ne la fournit peut-être pas. Lancez
   **Tester la connexion** et partagez le résultat dans une issue.
-- Les journaux de l’intégration sont disponibles dans Gladys (page de
-  l’intégration). Réglez `LOG_LEVEL=debug` pour plus de détails ; mots de passe
-  et jetons n’y figurent jamais.
+- Les journaux de l’intégration sont disponibles dans Gladys, dans l’onglet
+  **Journaux** de l’intégration. En fonctionnement normal, ils restent calmes :
+  démarrage, connexion, pannes et leur rétablissement, et vos actions. Réglez
+  `LOG_LEVEL=debug` pour plus de détails ; mots de passe et jetons n’y figurent
+  jamais.
