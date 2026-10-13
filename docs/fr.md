@@ -1,67 +1,139 @@
-# Template de démonstration
+# SFR Box
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+Suivez votre SFR Box depuis Gladys : ligne, connexion Internet, Wi-Fi,
+appareils connectés, et redémarrez-la depuis une scène ou le tableau de bord.
+Tout reste sur votre réseau local : Gladys interroge la box une fois par minute
+par son API locale, sans compte cloud.
 
-## Ce que vous obtenez
+> **Développée sans le matériel : retours bienvenus.** Cette intégration a été
+> écrite à partir de la documentation publique de l’API de la box et de vraies
+> réponses recueillies par la bibliothèque libre
+> [hacf-fr/sfrbox-api](https://github.com/hacf-fr/sfrbox-api) (Home Assistant).
+> Si quelque chose manque ou est faux sur votre box, ouvrez une issue avec votre
+> modèle et votre firmware (affichés par le bouton **Tester la connexion**).
+>
+> Cette intégration n’est pas affiliée à SFR.
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+## Box compatibles
+
+La box doit exposer l’API locale « neufbox » (`http://192.168.1.1/api/1.0/`).
+
+| Box                                         | État                                                                                                                                                                    |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NB4, NB5, NB6, NB6V, NB6VAC                 | L’API est documentée pour ces modèles.                                                                                                                                  |
+| Firmwares récents (`BOX10H`, `3DCM` / FTTB) | Informations système confirmées par de vraies réponses ; le reste n’est pas testé.                                                                                      |
+| SFR Box 8 et 8X                             | Inconnu : ni la documentation de l’API ni Home Assistant ne les citent. Les firmwares récents ci-dessus laissent penser qu’elles répondent. Vos retours sont bienvenus. |
+| Box sans cette API (ex. `NCC`)              | Non prises en charge.                                                                                                                                                   |
+
+## Prérequis
+
+- Gladys 5.1 ou plus récent.
+- Gladys et la box sur le même réseau local.
+- Facultatif : le **mot de passe administrateur** de la box. Par défaut, c’est
+  la clé Wi-Fi inscrite sur l’étiquette de la box, sauf si vous l’avez changé
+  dans l’interface de la box (`http://192.168.1.1`).
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+1. Installez l’intégration depuis le catalogue de Gladys, puis ouvrez son onglet
+   **Configuration**.
+2. **Adresse de la box** : `192.168.1.1`, sauf si votre réseau en utilise une
+   autre.
+3. **Identifiant** (`admin`) et **mot de passe administrateur** : facultatifs.
+   Sans eux, vous avez la ligne, la connexion Internet et les informations
+   système. Avec eux, vous avez aussi l’état du Wi-Fi et le redémarrage.
+4. **Découvrir les appareils connectés** : liste les appareils vus par la box,
+   pour la détection de présence.
+5. **Langue des noms de fonctionnalités** : les noms donnés aux
+   fonctionnalités quand vous ajoutez un appareil (ils ne changent plus
+   ensuite).
+6. Enregistrez, puis cliquez sur **Tester la connexion** : le résultat indique
+   le modèle, le firmware, la ligne, le nombre d’appareils connectés et si le
+   mot de passe est accepté.
+7. Ouvrez l’onglet **Découverte** et ajoutez l’appareil **SFR Box**, ainsi que
+   les appareils connectés que vous voulez suivre.
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
+Le mot de passe est conservé par Gladys et n’est jamais écrit dans les
+journaux.
 
-## Actions
+## Ce que vous obtenez
 
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
+**L’appareil « SFR Box »**
+
+| Fonctionnalité                                           | Quand                                |
+| -------------------------------------------------------- | ------------------------------------ |
+| Connexion Internet (connectée ou non)                    | toujours                             |
+| Connexion IPv6                                           | toujours                             |
+| Adresse IPv4 publique                                    | toujours                             |
+| Type de ligne (ADSL, FTTH…)                              | toujours                             |
+| Ligne DSL synchronisée                                   | ligne DSL                            |
+| Débits DSL descendant et montant (kbit/s)                | ligne DSL                            |
+| Atténuation et marge de bruit, descendantes et montantes | ligne DSL                            |
+| Ligne fibre active                                       | ligne fibre                          |
+| Wi-Fi activé                                             | avec le mot de passe administrateur  |
+| Durée de fonctionnement (heures)                         | toujours                             |
+| Température de la box                                    | si la box a une sonde de température |
+| Modèle, firmware                                         | toujours                             |
+
+La ligne fibre n’expose aucun débit par cette API : les débits ne concernent
+que le DSL. Si vous ajoutez le mot de passe plus tard ou si votre ligne passe à
+la fibre, l’onglet **Découverte** propose de **Mettre à jour** l’appareil.
+
+**Appareils connectés (présence)**
+
+Chaque appareil vu par la box peut être ajouté comme appareil Gladys avec une
+fonctionnalité **Présence**, affichée « vu il y a N minutes ». Elle est
+rafraîchie quand l’appareil apparaît sur le réseau, puis toutes les 5 minutes
+tant qu’il reste connecté. Pour marquer quelqu’un absent, utilisez l’action de
+scène de Gladys **Vérifier la présence d’un utilisateur** avec un délai de
+**10 minutes ou plus**.
+
+Les téléphones utilisent souvent une **adresse Wi-Fi privée (aléatoire)** par
+réseau : désactivez-la pour le réseau de la maison dans les réglages Wi-Fi du
+téléphone, sinon l’appareil apparaît sous une nouvelle adresse. Selon le
+firmware, la box ne donne cette liste qu’avec le mot de passe administrateur.
 
 ## Scènes
 
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
+- **Connexion Internet perdue** (déclencheur) : la box signale sa connexion
+  Internet coupée. Pas déclenché pendant un redémarrage demandé par Gladys.
+- **Connexion Internet rétablie** (déclencheur) : la connexion est revenue. Les
+  actions suivantes lisent la durée de la coupure avec
+  `{{triggerEvent.data.outage_seconds}}` (à une minute près environ, vide si la
+  coupure a commencé avant que Gladys ne surveille).
+- **Redémarrer la SFR Box** (action) : Internet, TV et téléphone sont coupés
+  quelques minutes. Nécessite le mot de passe administrateur.
 
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
+Ces déclencheurs reposent sur ce que dit la box : si la box elle-même est
+injoignable (éteinte, en redémarrage), rien n’est déclenché.
 
 ## Tableau de bord
 
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+Le widget **SFR Box** affiche la connexion Internet, l’état de la ligne, les
+débits DSL, la durée de fonctionnement et la température. Son réglage
+**Afficher un bouton de redémarrage** ajoute un bouton de redémarrage, avec
+confirmation, quand le mot de passe est configuré.
+
+## Actions
+
+- **Tester la connexion** : interroge la box maintenant et vérifie le mot de
+  passe.
+- **Redémarrer la box** : cochez **Je confirme le redémarrage**, puis lancez
+  l’action.
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+- **« SFR Box injoignable »** : vérifiez l’adresse, et que Gladys tourne sur le
+  même réseau que la box (un VPN ou un second routeur entre les deux empêche
+  l’accès).
+- **« Mot de passe refusé par la box »** : vérifiez le mot de passe dans
+  l’interface de la box. Gladys arrête d’essayer après un refus, pour ne pas
+  bloquer le compte : enregistrez de nouveau la configuration pour réessayer.
+- **« La box n’accepte que l’authentification par bouton »** : la box désactive
+  l’authentification par mot de passe. Activez-la dans l’interface de la box
+  pour l’état du Wi-Fi et le redémarrage.
+- Une valeur reste vide : votre firmware ne la fournit peut-être pas. Lancez
+  **Tester la connexion** et partagez le résultat dans une issue.
+- Les journaux de l’intégration sont disponibles dans Gladys (page de
+  l’intégration). Réglez `LOG_LEVEL=debug` pour plus de détails ; mots de passe
+  et jetons n’y figurent jamais.
