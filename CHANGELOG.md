@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-13
+
 ### Added
 
 - First version of the SFR Box integration, on the local API of the box (NB4
@@ -25,4 +27,5 @@ the notes of the version's GitHub Release.
 - The "SFR Box" dashboard widget, with an optional reboot button.
 - Texts in English, French, German and Spanish.
 
-[Unreleased]: https://github.com/guim31/gladys-sfr-box/commits/main
+[Unreleased]: https://github.com/guim31/gladys-sfr-box/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-sfr-box/releases/tag/v1.0.1
