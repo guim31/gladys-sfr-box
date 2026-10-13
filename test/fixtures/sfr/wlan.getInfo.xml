@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<rsp stat="ok" version="1.0">
+  <wlan active="on" channel="11" mode="11ng" mac_filtering="off">
+    <wl0 ssid="FAKE_SSID" enc="WPA-PSK" keytype="ascii" wpakey="FAKE-WIFI-KEY-not-real" wepkey="" />
+  </wlan>
+</rsp>

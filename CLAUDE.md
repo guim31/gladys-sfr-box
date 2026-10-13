@@ -31,16 +31,23 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+index.js                          entry point: SDK instance, shutdown, connect()
+src/app.js                        every handler, registered before connect() (testable)
+src/monitor.js                    one-minute reading loop: discovery, states, presence, triggers
+src/sfr/client.js                 SFR Box API client (token auth), ported from hacf-fr/sfrbox-api
+src/sfr/xml.js                    minimal reader of the XML answers (no dependency)
+src/sfr/snapshot.js               one reading of the box, normalized
+src/devices/box.js                the "SFR Box" device: feature specs = payload + state reader
+src/devices/host.js               a connected device (presence-sensor/push)
+src/actions.js                    Configuration screen actions (manifest `actions`)
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/widgets.js                    dashboard widget (manifest `widgets`)
+src/i18n.js                       every user-facing text, en / fr / de / es
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
 docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+test/                             node --test, against the SDK's fake Gladys and a fake box
+test/helpers/fake-box.js          fake SFR Box (fixtures of test/fixtures/sfr, token auth)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -135,6 +142,14 @@ code de ce dépôt. Compléter ce fichier quand un nouveau piège est découvert
   fonctionnalité. `gauge_min`/`gauge_max` ne pilotent que les couleurs, et le cœur n'applique
   jamais `min`/`max` en écriture : ce sont des bornes d'affichage. Une valeur signée exige des
   bornes symétriques.
+- **Présence** : le cœur la gère comme le Bluetooth, en `presence-sensor`/`push` publié à 1 à chaque
+  observation ; l’action de scène « Vérifier la présence » compare `last_value_changed` à son délai.
+  Avec `publishChangedStates` et un heartbeat, une valeur constante (1) n’est renvoyée qu’au heartbeat :
+  un retour à la maison attendrait jusqu’à lui. Appeler `forgetPublishedStates(feature)` à chaque
+  arrivée (absent → vu), et dire dans la doc de régler la vérification au-delà du heartbeat.
+- **Décibels** : aucune catégorie du front ne propose `decibel` ; `noise-sensor/integer` l’affiche
+  correctement. Éviter `signal/*` pour une mesure en dB : le front le dessine en barres de qualité
+  (`SignalQualityDeviceValue`).
 - Le cœur plafonne à **300 états par minute** et réévalue les scènes à chaque état : ne publier
   que les changements.
 - Une intégration `device` ne reçoit pas la langue de l'utilisateur, une action de scène non
@@ -162,7 +177,11 @@ code de ce dépôt. Compléter ce fichier quand un nouveau piège est découvert
   résolution des références ; un contenu amputé reste en cache jusqu'au TTL. Appeler
   `requestWidgetRefresh` à la création d'un appareil. `validateWidgetContent` est exporté pour les
   tests, mais ne vérifie pas que les `external_id` liés existent : les croiser avec `buildDevice`.
-- Une ligne de `status` exige un `value` (nombre ou texte ≤ 40).
+- Une ligne de `status` exige un `value` (nombre ou texte ≤ 40). Une tuile `value` texte tient en
+  **12 caractères** : mesurer chaque traduction aux valeurs extrêmes (« 23 Std 59 Min » en fait 13).
+- **Boucle de scène** : une action qui coupe ce que surveille un déclencheur (redémarrer la box →
+  « connexion perdue ») boucle si une scène relie les deux. Taire les déclencheurs le temps de l’effet
+  de l’action (ici 10 min après un redémarrage demandé par Gladys).
 - Le cœur **jette un bouton dont la clé d'action est déjà prise** : clés numérotées.
 - Le vocabulaire des widgets n'a ni liste ni curseur, **par choix** du cœur. Seul un bouton
   `device_feature` numérique a un état actif natif.
@@ -183,6 +202,9 @@ code de ce dépôt. Compléter ce fichier quand un nouveau piège est découvert
   (schéma, `description` **100 caractères au plus par langue**, documentation de 300 caractères
   au moins, image Docker, cover de **150 Ko au plus**). Il demande Node ≥ 24 mais tourne sous
   Node 22 avec un avertissement.
+- Avant la première release, le validateur sort **une erreur attendue** : `docker_image` « not
+  publicly pullable (HTTP 403) », l’image n’existant pas encore sur ghcr.io. Toute autre erreur est
+  réelle.
 - L'indexeur lit le manifeste de la **dernière release**, pas celui de `main` : une correction du
   manifeste (catégorie, description…) n'atteint le store qu'avec une release.
 - L'indexeur rejette **en silence** : la raison n'apparaît que dans `rejected.json`, à côté de

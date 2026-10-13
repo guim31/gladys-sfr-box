@@ -1,177 +1,307 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "SFR Box",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Line, Internet connection, Wi-Fi and connected devices of your SFR Box, on the local network.",
+    "fr": "Ligne, connexion Internet, Wi-Fi et appareils connectés de votre SFR Box, en local.",
+    "de": "Leitung, Internetverbindung, WLAN und verbundene Geräte deiner SFR Box, lokal.",
+    "es": "Línea, conexión a Internet, Wi-Fi y dispositivos conectados de su SFR Box, en local."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-sfr-box:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-sfr-box/main/cover.png",
+  "categories": ["network"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
-      "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+      "label": {
+        "en": "Your SFR Box",
+        "fr": "Votre SFR Box",
+        "de": "Deine SFR Box",
+        "es": "Su SFR Box"
       },
-      "links": [
+      "description": {
+        "en": "Gladys reads the box on your local network once a minute. Without a password: line, Internet connection and system information. With the administrator password of the box (by default, the Wi-Fi key printed on the box label): Wi-Fi state and reboot. Developed without the hardware: feedback welcome. Not affiliated with SFR.",
+        "fr": "Gladys interroge la box sur votre réseau local une fois par minute. Sans mot de passe : ligne, connexion Internet et informations système. Avec le mot de passe administrateur de la box (par défaut, la clé Wi-Fi inscrite sur l’étiquette de la box) : état du Wi-Fi et redémarrage. Développée sans le matériel : retours bienvenus. Sans lien avec SFR.",
+        "de": "Gladys fragt die Box einmal pro Minute in deinem lokalen Netzwerk ab. Ohne Passwort: Leitung, Internetverbindung und Systeminformationen. Mit dem Administratorpasswort der Box (standardmäßig der WLAN-Schlüssel auf dem Etikett der Box): WLAN-Status und Neustart. Ohne die Hardware entwickelt: Rückmeldungen willkommen. Nicht mit SFR verbunden.",
+        "es": "Gladys consulta el router en su red local una vez por minuto. Sin contraseña: línea, conexión a Internet e información del sistema. Con la contraseña de administrador del router (por defecto, la clave Wi-Fi impresa en la etiqueta): estado del Wi-Fi y reinicio. Desarrollada sin el hardware: sus comentarios son bienvenidos. Sin relación con SFR."
+      }
+    },
+    {
+      "key": "host",
+      "type": "string",
+      "label": {
+        "en": "Box address",
+        "fr": "Adresse de la box",
+        "de": "Adresse der Box",
+        "es": "Dirección del router"
+      },
+      "description": {
+        "en": "IP address or name of the box on your network, 192.168.1.1 by default.",
+        "fr": "Adresse IP ou nom de la box sur votre réseau, 192.168.1.1 par défaut.",
+        "de": "IP-Adresse oder Name der Box in deinem Netzwerk, standardmäßig 192.168.1.1.",
+        "es": "Dirección IP o nombre del router en su red, 192.168.1.1 por defecto."
+      },
+      "placeholder": {
+        "en": "192.168.1.1",
+        "fr": "192.168.1.1",
+        "de": "192.168.1.1",
+        "es": "192.168.1.1"
+      },
+      "required": true,
+      "default": "192.168.1.1"
+    },
+    {
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "Administrator login",
+        "fr": "Identifiant administrateur",
+        "de": "Administrator-Benutzername",
+        "es": "Usuario administrador"
+      },
+      "description": {
+        "en": "Login of the box web interface, admin unless you changed it.",
+        "fr": "Identifiant de l’interface web de la box, admin sauf si vous l’avez changé.",
+        "de": "Benutzername der Weboberfläche der Box, admin, außer du hast ihn geändert.",
+        "es": "Usuario de la interfaz web del router, admin salvo si usted lo cambió."
+      },
+      "required": false,
+      "default": "admin"
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Administrator password",
+        "fr": "Mot de passe administrateur",
+        "de": "Administratorpasswort",
+        "es": "Contraseña de administrador"
+      },
+      "description": {
+        "en": "Optional. Needed for the Wi-Fi state and the reboot. Stored by Gladys, never written in the logs.",
+        "fr": "Facultatif. Nécessaire pour l’état du Wi-Fi et le redémarrage. Conservé par Gladys, jamais écrit dans les journaux.",
+        "de": "Optional. Nötig für den WLAN-Status und den Neustart. Von Gladys gespeichert, nie in die Logs geschrieben.",
+        "es": "Opcional. Necesaria para el estado del Wi-Fi y el reinicio. Guardada por Gladys, nunca escrita en los registros."
+      },
+      "required": false
+    },
+    {
+      "key": "discover_hosts",
+      "type": "boolean",
+      "label": {
+        "en": "Discover the connected devices",
+        "fr": "Découvrir les appareils connectés",
+        "de": "Verbundene Geräte erkennen",
+        "es": "Descubrir los dispositivos conectados"
+      },
+      "description": {
+        "en": "Lists the devices the box sees in the Discovery tab, for presence detection by MAC address.",
+        "fr": "Liste dans l’onglet Découverte les appareils vus par la box, pour la détection de présence par adresse MAC.",
+        "de": "Zeigt die von der Box gesehenen Geräte im Tab „Erkennung“, für die Anwesenheitserkennung per MAC-Adresse.",
+        "es": "Muestra en la pestaña Descubrimiento los dispositivos que ve el router, para detectar la presencia por dirección MAC."
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the feature names",
+        "fr": "Langue des noms de fonctionnalités",
+        "de": "Sprache der Funktionsnamen",
+        "es": "Idioma de los nombres de funciones"
+      },
+      "description": {
+        "en": "Names given to the features when you add a device to Gladys.",
+        "fr": "Noms donnés aux fonctionnalités quand vous ajoutez un appareil à Gladys.",
+        "de": "Namen der Funktionen, wenn du ein Gerät zu Gladys hinzufügst.",
+        "es": "Nombres dados a las funciones cuando usted añade un dispositivo a Gladys."
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "value": "en",
+          "label": { "en": "English", "fr": "English", "de": "English", "es": "English" }
+        },
+        {
+          "value": "fr",
+          "label": { "en": "Français", "fr": "Français", "de": "Français", "es": "Français" }
+        },
+        {
+          "value": "de",
+          "label": { "en": "Deutsch", "fr": "Deutsch", "de": "Deutsch", "es": "Deutsch" }
+        },
+        {
+          "value": "es",
+          "label": { "en": "Español", "fr": "Español", "de": "Español", "es": "Español" }
         }
       ]
-    },
-    {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
-      "required": false,
-      "default": "celsius",
-      "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
-      ]
-    },
-    {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
-      "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
-      },
-      "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "description": {
+        "en": "Reads the box now and checks the password.",
+        "fr": "Interroge la box maintenant et vérifie le mot de passe.",
+        "de": "Fragt die Box jetzt ab und prüft das Passwort.",
+        "es": "Consulta el router ahora y comprueba la contraseña."
+      },
       "timeout_seconds": 30
     },
     {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
+      "key": "reboot",
+      "label": {
+        "en": "Reboot the box",
+        "fr": "Redémarrer la box",
+        "de": "Box neu starten",
+        "es": "Reiniciar el router"
+      },
+      "description": {
+        "en": "Internet, TV and phone are cut for a few minutes. Needs the administrator password.",
+        "fr": "Internet, TV et téléphone sont coupés quelques minutes. Nécessite le mot de passe administrateur.",
+        "de": "Internet, TV und Telefon sind ein paar Minuten unterbrochen. Braucht das Administratorpasswort.",
+        "es": "Internet, TV y teléfono se cortan unos minutos. Necesita la contraseña de administrador."
+      },
+      "timeout_seconds": 30,
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "key": "confirm",
+          "type": "boolean",
+          "label": {
+            "en": "I confirm the reboot",
+            "fr": "Je confirme le redémarrage",
+            "de": "Ich bestätige den Neustart",
+            "es": "Confirmo el reinicio"
+          },
+          "required": false
         }
       ]
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "connection_lost",
+      "label": {
+        "en": "Internet connection lost",
+        "fr": "Connexion Internet perdue",
+        "de": "Internetverbindung verloren",
+        "es": "Conexión a Internet perdida"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "The box reports its Internet connection down (not fired during a reboot asked through Gladys).",
+        "fr": "La box signale sa connexion Internet coupée (pas pendant un redémarrage demandé par Gladys).",
+        "de": "Die Box meldet ihre Internetverbindung als getrennt (nicht während eines Neustarts über Gladys).",
+        "es": "El router indica su conexión a Internet cortada (no durante un reinicio pedido desde Gladys)."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
+          "label": { "en": "Box", "fr": "Box", "de": "Box", "es": "Router" }
+        }
+      ]
+    },
+    {
+      "key": "connection_restored",
+      "label": {
+        "en": "Internet connection restored",
+        "fr": "Connexion Internet rétablie",
+        "de": "Internetverbindung wiederhergestellt",
+        "es": "Conexión a Internet restablecida"
+      },
+      "description": {
+        "en": "The box reports its Internet connection back after an outage it reported.",
+        "fr": "La box signale le retour de sa connexion Internet après une coupure qu’elle a signalée.",
+        "de": "Die Box meldet ihre Internetverbindung zurück, nach einer gemeldeten Unterbrechung.",
+        "es": "El router indica el regreso de su conexión a Internet tras un corte que indicó."
+      },
+      "fields": [
         {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
-          "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
-          ]
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Box", "fr": "Box", "de": "Box", "es": "Router" }
         }
       ],
       "variables": [
         {
-          "key": "target",
-          "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "key": "outage_seconds",
+          "type": "number",
+          "label": {
+            "en": "Outage duration (seconds)",
+            "fr": "Durée de la coupure (secondes)",
+            "de": "Dauer der Unterbrechung (Sekunden)",
+            "es": "Duración del corte (segundos)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "reboot_box",
+      "label": {
+        "en": "Reboot the SFR Box",
+        "fr": "Redémarrer la SFR Box",
+        "de": "SFR Box neu starten",
+        "es": "Reiniciar la SFR Box"
       },
-      "timeout_seconds": 15,
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ],
-      "outputs": [
-        {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
-        }
-      ]
+      "description": {
+        "en": "Internet, TV and phone are cut for a few minutes. Needs the administrator password.",
+        "fr": "Internet, TV et téléphone sont coupés quelques minutes. Nécessite le mot de passe administrateur.",
+        "de": "Internet, TV und Telefon sind ein paar Minuten unterbrochen. Braucht das Administratorpasswort.",
+        "es": "Internet, TV y teléfono se cortan unos minutos. Necesita la contraseña de administrador."
+      },
+      "timeout_seconds": 30
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
+      "key": "sfr_box",
+      "label": { "en": "SFR Box", "fr": "SFR Box", "de": "SFR Box", "es": "SFR Box" },
       "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+        "en": "Internet connection, line state and rates, uptime of the box.",
+        "fr": "Connexion Internet, état et débits de la ligne, durée de fonctionnement de la box.",
+        "de": "Internetverbindung, Leitungsstatus und Datenraten, Betriebszeit der Box.",
+        "es": "Conexión a Internet, estado y velocidades de la línea, tiempo de funcionamiento."
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "icon": "globe",
+      "settings": [
+        {
+          "key": "reboot_button",
+          "type": "boolean",
+          "label": {
+            "en": "Show a reboot button",
+            "fr": "Afficher un bouton de redémarrage",
+            "de": "Neustart-Taste anzeigen",
+            "es": "Mostrar un botón de reinicio"
+          },
+          "description": {
+            "en": "Asks for a confirmation before rebooting. Needs the administrator password.",
+            "fr": "Demande une confirmation avant de redémarrer. Nécessite le mot de passe administrateur.",
+            "de": "Fragt vor dem Neustart nach einer Bestätigung. Braucht das Administratorpasswort.",
+            "es": "Pide una confirmación antes de reiniciar. Necesita la contraseña de administrador."
+          },
+          "required": false,
+          "default": false
+        }
+      ],
+      "action_timeout_seconds": 30
     }
   ]
 }

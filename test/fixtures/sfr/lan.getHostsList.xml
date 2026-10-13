@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rsp stat="ok" version="1.0">
+  <host name="phone-alice" ip="192.168.1.20" mac="02:00:5e:00:00:a1" iface="wlan0" probe="120" alive="4000" type="pc" status="online" />
+  <host name="laptop" ip="192.168.1.21" mac="02:00:5E:00:00:B2" iface="lan1" probe="100" alive="300" type="pc" status="offline" />
+  <host name="" ip="192.168.1.22" mac="02:00:5e:00:00:c3" iface="wlan0" probe="90" alive="3900" type="pc" status="online" />
+  <host name="broken" ip="192.168.1.23" mac="not-a-mac" iface="lan2" probe="1" alive="1" type="pc" status="online" />
+</rsp>
