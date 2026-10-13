@@ -1,6 +1,6 @@
 {
   "name": "gladys-sfr-box",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "SFR Box integration for Gladys Assistant: line, Internet connection, Wi-Fi and connected devices, on the local network. Not affiliated with SFR.",
   "type": "module",
