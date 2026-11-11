@@ -27,7 +27,7 @@ The box must expose the local "neufbox" API (`http://192.168.1.1/api/1.0/`).
 
 ## Prerequisites
 
-- Gladys 5.1 or later.
+- Gladys 5.3 or later.
 - Gladys and the box on the same local network.
 - Optional: the **administrator password** of the box. By default it is the
   Wi-Fi key printed on the label of the box, unless you changed it in the box

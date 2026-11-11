@@ -28,7 +28,7 @@ Die Box muss die lokale „neufbox“-API bereitstellen (`http://192.168.1.1/api
 
 ## Voraussetzungen
 
-- Gladys 5.1 oder neuer.
+- Gladys 5.3 oder neuer.
 - Gladys und die Box im selben lokalen Netzwerk.
 - Optional: das **Administratorpasswort** der Box. Standardmäßig ist es der
   WLAN-Schlüssel auf dem Etikett der Box, außer du hast es in der Oberfläche

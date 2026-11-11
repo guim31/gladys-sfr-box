@@ -27,7 +27,7 @@ El router debe ofrecer la API local «neufbox» (`http://192.168.1.1/api/1.0/`).
 
 ## Requisitos
 
-- Gladys 5.1 o posterior.
+- Gladys 5.3 o posterior.
 - Gladys y el router en la misma red local.
 - Opcional: la **contraseña de administrador** del router. Por defecto es la
   clave Wi-Fi impresa en la etiqueta del router, salvo si usted la cambió en la
