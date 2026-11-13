@@ -27,7 +27,7 @@ La box doit exposer l’API locale « neufbox » (`http://192.168.1.1/api/1.0/`)
 
 ## Prérequis
 
-- Gladys 5.1 ou plus récent.
+- Gladys 5.3 ou plus récent.
 - Gladys et la box sur le même réseau local.
 - Facultatif : le **mot de passe administrateur** de la box. Par défaut, c’est
   la clé Wi-Fi inscrite sur l’étiquette de la box, sauf si vous l’avez changé
